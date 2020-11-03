@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mapper.SubjectTypeMapper">
+
+
+    <select id="getSubjectTypes" resultType="subjectType">
+        SELECT *
+        FROM subject_type
+    </select>
+
+    <select id="getSubjectTypeBySubjectTypeId" parameterType="int" resultType="subjectType">
+        SELECT *
+        FROM subject_type
+        WHERE subject_type_id = #{subjectTypeId}
+    </select>
+</mapper>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mapper.SubjectMapper">
+
+    <insert id="addSubject" parameterType="subject" useGeneratedKeys="true" keyProperty="subjectId">
+        INSERT INTO subject
+        VALUES (default, #{subjectName}, #{subjectLife}, #{createTime}, #{subjectType.subjectTypeId})
+    </insert>
+
+    <update id="updateSubject" parameterType="subject">
+        UPDATE subject
+        <set>
+            <if test="subjectName!=null">subject_name=#{subjectName},</if>
+            <if test="subjectLife!=null">subject_life=#{subjectLife},</if>
+            <if test="createTime!=null">create_time=#{createTime},</if>
+            <if test="subjectType!=null and subjectType.subjectTypeId!=null">
+                subject_type_id=#{subjectType.subjectTypeId}
+            </if>
+        </set>
+        WHERE subject_id=#{subjectId}
+    </update>
+
+    <delete id="deleteSubjectBySubjectId" parameterType="int">
+        DELETE
+        FROM subject
+        WHERE subject_id = #{subjectId}
+    </delete>
+
+    <select id="getSubjectBySubjectId" parameterType="int" resultMap="subjectMap">
+        SELECT *
+        FROM subject
+        WHERE subject_id = #{subjectId}
+    </select>
+
+    <resultMap id="subjectMap" type="subject">
+        <id column="subject_id" property="subjectId"/>
+        <result column="subject_name" property="subjectName"/>
+        <result column="subject_life" property="subjectLife"/>
+        <result column="create_time" property="createTime"/>
+        <association property="subjectType" javaType="subjectType" column="subject_type_id"
+                     select="com.xzy.mapper.SubjectTypeMapper.getSubjectTypeBySubjectTypeId"/>
+    </resultMap>
+
+    <select id="getSubjectList" resultMap="subjectMap">
+        SELECT *
+        FROM subject
+    </select>
+</mapper>

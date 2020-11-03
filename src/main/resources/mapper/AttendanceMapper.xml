@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mapper.AttendanceMapper">
+
+    <insert id="addAttendance" parameterType="attendance" useGeneratedKeys="true" keyProperty="attendanceId">
+        INSERT INTO attendance
+        VALUES (default, #{applicant.empId}, #{workType.workTypeId}, #{startTime}, #{endTime}, #{days}, default,
+                #{reason})
+    </insert>
+
+    <update id="updateAttendance" parameterType="attendance">
+        UPDATE attendance
+        <set>
+            <if test="applicant!=null and applicant.empId!=null">emp_id=#{applicant.empId},</if>
+            <if test="workType!=null and workType.workTypeId!=null">work_type_id=#{workType.workTypeId},</if>
+            <if test="startTime!=null">start_time=#{startTime},</if>
+            <if test="endTime!=null">end_time=#{endTime},</if>
+            <if test="days!=null">days=#{days},</if>
+            <if test="reason!=null">reason=#{reason},</if>
+            <if test="resultStatus!=null">result_status=#{resultStatus}</if>
+        </set>
+        WHERE attendance_id=#{attendanceId}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE attendance
+        set result_status=3
+        WHERE end_time <![CDATA[<]]> NOW()
+    </update>
+
+    <delete id="deleteAttendanceByAttendanceId" parameterType="int">
+        DELETE
+        FROM attendance
+        WHERE attendance_id = #{attendanceId}
+    </delete>
+
+    <select id="getAttendanceByEmpId" parameterType="int" resultMap="attendanceMap">
+        SELECT *
+        FROM attendance a,
+             employee e,
+             work_type wt
+        WHERE a.emp_id = e.emp_id
+          AND a.work_type_id = wt.work_type_id
+          AND a.emp_id = #{empId}
+        ORDER BY a.attendance_id desc
+    </select>
+
+    <select id="getAttendanceByAttendanceId" parameterType="int" resultMap="attendanceMap">
+        SELECT *
+        FROM attendance a,
+             employee e,
+             work_type wt
+        WHERE a.emp_id = e.emp_id
+          AND a.work_type_id = wt.work_type_id
+          AND attendance_id = #{attendanceId}
+    </select>
+
+    <select id="getAttendanceList" resultMap="attendanceMap">
+        SELECT *
+        FROM attendance a,
+             employee e,
+             work_type wt
+        WHERE a.emp_id = e.emp_id
+          AND a.work_type_id = wt.work_type_id
+        ORDER BY a.attendance_id desc
+    </select>
+
+    <resultMap id="attendanceMap" type="attendance">
+        <id column="attendance_id" property="attendanceId"/>
+        <result column="start_time" property="startTime"/>
+        <result column="end_time" property="endTime"/>
+        <result column="days" property="days"/>
+        <result column="reason" property="reason"/>
+        <result column="result_status" property="resultStatus"/>
+        <association property="applicant" javaType="employee" column="emp_id">
+            <id column="emp_id" property="empId"/>
+            <result column="emp_name" property="empName"/>
+        </association>
+        <association property="workType" javaType="workType" column="work_type_id">
+            <id column="work_type_id" property="workTypeId"/>
+            <result column="work_type_name" property="workTypeName"/>
+        </association>
+    </resultMap>
+</mapper>

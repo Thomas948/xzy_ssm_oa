@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mapper.EmployeeMapper">
+
+    <insert id="addEmployee" parameterType="employee" useGeneratedKeys="true" keyProperty="empId">
+        INSERT INTO employee
+        VALUES (default, #{empName}, #{dept.deptId}, #{gender}, #{phone}, #{qq}, #{email}, #{hireTime}, #{empPassword},
+                #{salt}, #{role.roleId}, default)
+    </insert>
+
+    <update id="updateEmployee" parameterType="employee">
+        UPDATE employee
+        <set>
+            <if test="empName!=null">emp_name=#{empName},</if>
+            <if test="dept!=null and dept.deptId!=null">dept_id=#{dept.deptId},</if>
+            <if test="gender!=null">gender=#{gender},</if>
+            <if test="phone!=null">phone=#{phone},</if>
+            <if test="qq!=null">qq=#{qq},</if>
+            <if test="email!=null">email=#{email},</if>
+            <if test="hireTime!=null">hire_time=#{hireTime},</if>
+            <if test="empPassword!=null">emp_password=#{empPassword},</if>
+            <if test="role!=null and role.roleId!=null">role_id=#{role.roleId},</if>
+            <if test="salt!=null">salt=#{salt},</if>
+            <if test="icon!=null">icon=#{icon}</if>
+        </set>
+        WHERE emp_id=#{empId}
+    </update>
+
+    <delete id="deleteEmployeeByEmpId" parameterType="int">
+        DELETE
+        FROM employee
+        WHERE emp_id = #{empId}
+    </delete>
+
+    <select id="getEmployeeByEmpId" parameterType="int" resultMap="empMap">
+        SELECT *
+        FROM employee e,
+             department d,
+             role r
+        WHERE e.dept_id = d.dept_id
+          AND e.role_id = r.role_id
+          AND emp_id = #{empId}
+    </select>
+
+    <select id="getEmployeeList" resultMap="empMap">
+        SELECT *
+        FROM employee e,
+             department d,
+             role r
+        WHERE e.dept_id = d.dept_id
+          AND e.role_id = r.role_id
+    </select>
+
+    <resultMap id="empMap" type="employee">
+        <id column="emp_id" property="empId"/>
+        <result column="emp_name" property="empName"/>
+        <result column="gender" property="gender"/>
+        <result column="phone" property="phone"/>
+        <result column="qq" property="qq"/>
+        <result column="email" property="email"/>
+        <result column="hire_time" property="hireTime"/>
+        <result column="emp_password" property="empPassword"/>
+        <result column="salt" property="salt"/>
+        <result column="icon" property="icon"/>
+        <association property="dept" javaType="department" column="dept_id">
+            <id column="dept_id" property="deptId"/>
+            <result column="dept_name" property="deptName"/>
+        </association>
+        <association property="role" javaType="role" column="role_id">
+            <id column="role_id" property="roleId"/>
+            <result column="role_name" property="roleName"/>
+        </association>
+    </resultMap>
+
+    <select id="getEmployeeByEmail" parameterType="String" resultMap="empMap">
+        SELECT *
+        FROM employee e,
+             role r
+        WHERE e.role_id = r.role_id
+          AND e.email = #{email}
+    </select>
+</mapper>

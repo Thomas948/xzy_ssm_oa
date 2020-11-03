@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!-- 将job加入到IOC容器的类注册到IOC容器 -->
+    <bean id="jobFactory" class="com.xzy.job.CustomJobFactory"/>
+
+    <!-- 创建任务 -->
+    <bean id="job" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+	
+		<property name="name" value="job1"/>
+		
+		<property name="group" value="group1"/>
+		
+		<property name="jobClass" value="com.xzy.job.AttendanceEndJob"/>
+	</bean>
+
+    <!-- 创建触发器 -->
+    <bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+	
+		<property name="name" value="t1"/>
+		
+		<property name="group" value="g1"/>
+		
+		<property name="jobDetail" ref="job"/>
+		
+		<property name="cronExpression" value="0 */30 * * * ?"/>
+	</bean>
+
+    <!-- 调度器 -->
+    <bean id="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="jobFactory" ref="jobFactory"/>
+		<property name="triggers">
+			<list>
+				<ref bean="trigger"/>
+			</list>
+		</property>
+	</bean>
+
+
+</beans>

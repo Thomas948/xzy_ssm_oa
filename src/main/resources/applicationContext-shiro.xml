@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+
+    <!-- 配置自定义Realm -->
+    <bean id="userRealm" class="com.xzy.realms.UserRealm">
+        <!-- 加密方式 -->
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.HashedCredentialsMatcher">
+                <property name="hashAlgorithmName" value="MD5"/>
+                <property name="hashIterations" value="1024"/>
+            </bean>
+        </property>
+    </bean>
+
+
+    <!--会话管理-->
+    <bean id="webSessionManager" class="org.apache.shiro.web.session.mgt.DefaultWebSessionManager">
+        <property name="globalSessionTimeout" value="#{1000*60*60}"/>
+    </bean>
+
+    <!-- 配置默认web安全管理器 -->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <!-- 自定义多realm,从数据库获取数据 -->
+        <property name="realm" ref="userRealm"/>
+        <!--会话管理-->
+        <property name="sessionManager" ref="webSessionManager"/>
+        <!--记住我-->
+        <property name="rememberMeManager">
+            <bean class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+                <property name="cookie">
+                    <bean class="org.apache.shiro.web.servlet.SimpleCookie">
+                        <!--自定义cookie名称-->
+                        <constructor-arg value="thomas"/>
+                        <!--防止前端勾走-->
+                        <property name="httpOnly" value="true"/>
+                        <!--过期时间-->
+                        <property name="maxAge" value="#{1000*60*60*24}"/>
+                    </bean>
+                </property>
+            </bean>
+        </property>
+    </bean>
+
+    <!-- shiro配置 -->
+    <bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <!-- 配置shiro的安全管理器 -->
+        <property name="securityManager" ref="securityManager"/>
+
+        <!-- 当在未认证的情况下访问了需要认证才能访问的地址时,跳转此地址 -->
+        <property name="loginUrl" value="/login"/>
+
+        <!-- 当访问的页面未授权 -->
+        <property name="unauthorizedUrl" value="/unauthorized"/>
+
+        <!-- 设置拦截规则 -->
+        <property name="filterChainDefinitions">
+            <value>
+                <!-- 根地址可以匿名访问 -->
+                / = anon
+                /fonts/** = anon
+                /images/** = anon
+                /css/** = anon
+                /js/** = anon
+                /*.jpg = anon
+                /*.png = anon
+                /login = anon
+                /verifyCode = anon
+                <!--/employee/** = anon-->
+
+                <!--roles: shiro的核心过滤器,表示必须拥有相应角色才能访问-->
+                /role/** = authc,perms[role_read,role_edit]
+
+                /attendance/approval/** = authc,perms[att_read,att_edit]
+                /attendance/download = authc,perms[att_read,att_edit]
+                /attendance/toList = authc,perms[att_read,att_edit]
+                /attendance/getPage = authc,perms[att_read,att_edit]
+                /attendance/** = user,perms[att_read]
+
+                /dept/toList = user,perms[dept_read]
+                /dept/getPage = user,perms[dept_read]
+                /dept/download = user,perms[dept_read]
+                /dept/** = authc,perms[dept_read,dept_edit]
+
+                /employee/toList = user,perms[emp_read]
+                /employee/getPage = user,perms[emp_read]
+                /employee/toImport = user,perms[emp_read]
+                /employee/downloadTemplate = user,perms[emp_read]
+                /employee/** = authc,perms[emp_read,emp_edit]
+
+                /classes/toList = user
+                /classes/getPage = user
+                /classes/download = user
+                /classes/** = authc,perms[class_read,class_edit]
+
+                /subject/toList = user
+                /subject/getPage = user
+                /subject/download = user
+                /subject/** = authc,perms[sub_read,sub_edit]
+
+                /student/toList = user,perms[stu_read]
+                /student/getPage = user,perms[stu_read]
+                /student/toImport = user,perms[stu_read]
+                /student/downloadTemplate = user,perms[stu_read]
+                /student/** = authc,perms[stu_read,stu_edit]
+
+                /index = user
+                <!--其余的全部认证之后才能访问-->
+                /** = authc
+            </value>
+        </property>
+    </bean>
+
+
+</beans>

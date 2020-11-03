@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mapper.StudentMapper">
+
+    <insert id="addStudent" parameterType="student" useGeneratedKeys="true" keyProperty="studentId">
+        INSERT INTO student
+        VALUES (default, #{studentName}, #{classes.classId}, #{stuGender}, #{stuPhone}, #{stuQq}, #{stuEmail},
+                #{graduateSchool}, #{education.educationId}, #{createTime}, #{inTime}, #{teacher.empId}, #{cardNum}
+                 )
+    </insert>
+
+    <update id="updateStudent" parameterType="student">
+        UPDATE student
+        <set>
+            <if test="studentName!=null">student_name=#{studentName},</if>
+            <if test="classes!=null and classes.classId!=null">class_id=#{classes.classId},</if>
+            <if test="stuGender!=null">stu_gender=#{stuGender},</if>
+            <if test="stuPhone!=null">stu_phone=#{stuPhone},</if>
+            <if test="stuQq!=null">stu_qq=#{stuQq},</if>
+            <if test="stuEmail!=null">stu_email=#{stuEmail},</if>
+            <if test="graduateSchool!=null">graduate_school=#{graduateSchool},</if>
+            <if test="education!=null and education.educationId!=null">education_id=#{education.educationId},</if>
+            <if test="createTime!=null">create_time=#{createTime},</if>
+            <if test="inTime!=null">in_time=#{inTime},</if>
+            <if test="teacher!=null and teacher.empId!=null">emp_id=#{teacher.empId},</if>
+            <if test="cardNum!=null">card_num=#{cardNum}</if>
+        </set>
+        WHERE student_id=#{studentId}
+    </update>
+
+    <delete id="deleteStudentByStudentId" parameterType="int">
+        DELETE
+        FROM student
+        WHERE student_id = #{studentId}
+    </delete>
+
+    <select id="getStudentByStudentId" parameterType="int" resultMap="stuMap">
+        SELECT *
+        FROM student s,
+             class c,
+             education edu,
+             employee emp
+        WHERE s.class_id = c.class_id
+          AND s.education_id = edu.education_id
+          AND s.emp_id = emp.emp_id
+          AND s.student_id = #{studentId}
+    </select>
+
+    <select id="getStudentList" resultMap="stuMap">
+        SELECT *
+        FROM student s,
+             class c,
+             education edu,
+             employee emp
+        WHERE s.class_id = c.class_id
+          AND s.education_id = edu.education_id
+          AND s.emp_id = emp.emp_id
+    </select>
+
+    <resultMap id="stuMap" type="student">
+        <id column="student_id" property="studentId"/>
+        <result column="student_name" property="studentName"/>
+        <result column="stu_gender" property="stuGender"/>
+        <result column="stu_phone" property="stuPhone"/>
+        <result column="stu_qq" property="stuQq"/>
+        <result column="stu_email" property="stuEmail"/>
+        <result column="graduate_school" property="graduateSchool"/>
+        <result column="create_time" property="createTime"/>
+        <result column="in_time" property="inTime"/>
+        <result column="card_num" property="cardNum"/>
+        <association property="classes" javaType="classes" column="class_id">
+            <id column="class_id" property="classId"/>
+            <result column="class_name" property="className"/>
+        </association>
+        <association property="education" javaType="education" column="education_id">
+            <id column="education_id" property="educationId"/>
+            <result column="education_name" property="educationName"/>
+        </association>
+        <association property="teacher" javaType="employee" column="emp_id">
+            <id column="emp_id" property="empId"/>
+            <result column="emp_name" property="empName"/>
+        </association>
+    </resultMap>
+
+    <select id="getStudentByEmail" parameterType="String" resultMap="stuMap">
+        SELECT *
+        FROM student s
+        WHERE  s.stu_email = #{stuEmail}
+    </select>
+</mapper>

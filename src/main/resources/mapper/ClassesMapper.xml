@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.xzy.mapper.ClassesMapper">
+
+
+    <insert id="addClass" parameterType="classes" useGeneratedKeys="true" keyProperty="classId">
+        INSERT INTO class
+        VALUES (default, #{className}, #{subject.subjectId}, #{classCount}, #{classLife}, #{classAddress},
+                #{createTime})
+    </insert>
+
+    <update id="updateClass" parameterType="classes">
+        UPDATE class
+        <set>
+            <if test="className!=null">class_name=#{className},</if>
+            <if test="subject!=null and subject.subjectId!=null">subject_id=#{subject.subjectId},</if>
+            <if test="classCount!=null">class_count=#{classCount},</if>
+            <if test="classLife!=null">class_life=#{classLife},</if>
+            <if test="classAddress!=null">class_address=#{classAddress},</if>
+            <if test="createTime!=null">create_time=#{createTime}</if>
+        </set>
+        WHERE class_id=#{classId}
+    </update>
+
+    <delete id="deleteClassByClassId" parameterType="int">
+        DELETE
+        FROM class
+        WHERE class_id = #{classId}
+    </delete>
+
+    <select id="getClassByClassId" parameterType="int" resultMap="classMap">
+        SELECT *
+        FROM class
+        WHERE class_id = #{classId}
+    </select>
+
+    <select id="getClassList" resultMap="classMap">
+        SELECT *
+        FROM class
+    </select>
+
+    <resultMap id="classMap" type="classes">
+        <id column="class_id" property="classId"/>
+        <result column="class_name" property="className"/>
+        <result column="class_count" property="classCount"/>
+        <result column="class_life" property="classLife"/>
+        <result column="class_address" property="classAddress"/>
+        <result column="create_time" property="createTime"/>
+        <association property="subject" javaType="subject" column="subject_id"
+                     select="com.xzy.mapper.SubjectMapper.getSubjectBySubjectId"/>
+    </resultMap>
+</mapper>
